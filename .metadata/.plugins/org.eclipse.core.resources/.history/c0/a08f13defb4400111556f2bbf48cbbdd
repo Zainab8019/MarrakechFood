@@ -1,0 +1,5 @@
+package com.example.livreurservice.exception;
+
+public class LivreurNotAvailableException {
+
+}

@@ -1,0 +1,138 @@
+package com.example.livreurservice.service;
+
+import com.example.livreurservice.client.CommandeServiceClient;
+import com.example.livreurservice.entity.Livreur;
+import com.example.livreurservice.entity.StatutLivreur;
+import com.example.livreurservice.repository.LivreurRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class LivreurServiceTest {
+
+    @Mock
+    private LivreurRepository repository;
+
+    @Mock
+    private CommandeServiceClient commandeServiceClient;
+
+    @InjectMocks
+    private LivreurService livreurService;
+
+    // TEST AJOUT 
+
+    @Test
+    void testAjouterLivreur() {
+        Livreur livreur = new Livreur(null, "Ali", "0600000000", "ali@mail.com",
+                StatutLivreur.DISPONIBLE, null, null);
+
+        when(repository.save(any(Livreur.class))).thenReturn(livreur);
+
+        Livreur result = livreurService.ajouterLivreur(livreur);
+
+        assertNotNull(result);
+        assertEquals(StatutLivreur.DISPONIBLE, result.getStatut());
+        verify(repository).save(any(Livreur.class));
+    }
+
+    //TEST GET ALL
+
+    @Test
+    void testGetAllLivreurs() {
+        when(repository.findAll()).thenReturn(List.of(new Livreur(), new Livreur()));
+
+        List<Livreur> result = livreurService.getAllLivreurs();
+
+        assertEquals(2, result.size());
+    }
+
+    // TEST DISPONIBLES
+
+    @Test
+    void testGetLivreursDisponibles() {
+        when(repository.findByStatut(StatutLivreur.DISPONIBLE))
+                .thenReturn(List.of(new Livreur()));
+
+        List<Livreur> result = livreurService.getLivreursDisponibles();
+
+        assertEquals(1, result.size());
+    }
+
+    // TEST ASSIGNATION
+
+    @Test
+    void testAssignerALaCommandeSuccess() {
+        Livreur livreur = new Livreur(1L, "Ali", "0600", "a@mail.com",
+                StatutLivreur.DISPONIBLE, null, null);
+
+        when(repository.findByStatut(StatutLivreur.DISPONIBLE))
+                .thenReturn(List.of(livreur));
+
+        when(repository.save(any())).thenReturn(livreur);
+
+        Livreur result = livreurService.assignerALaCommande(10L);
+
+        assertEquals(StatutLivreur.OCCUPE, result.getStatut());
+
+        verify(commandeServiceClient)
+                .assignerLivreur(10L, 1L);
+    }
+
+    @Test
+    void testAssignerAucuneDisponibilite() {
+        when(repository.findByStatut(StatutLivreur.DISPONIBLE))
+                .thenReturn(List.of());
+
+        assertThrows(RuntimeException.class,
+                () -> livreurService.assignerALaCommande(1L));
+    }
+
+    //  TEST CHANGER STATUT
+
+    @Test
+    void testChangerStatut() {
+        Livreur livreur = new Livreur(1L, "Ali", "0600", "a@mail.com",
+                StatutLivreur.DISPONIBLE, null, null);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(livreur));
+
+        livreurService.changerStatut(1L, StatutLivreur.OCCUPE);
+
+        assertEquals(StatutLivreur.OCCUPE, livreur.getStatut());
+        verify(repository).save(livreur);
+    }
+
+    @Test
+    void testChangerStatutNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class,
+                () -> livreurService.changerStatut(1L, StatutLivreur.OCCUPE));
+    }
+
+    //TEST QR
+
+    @Test
+    void testScannerQRCodeSuccess() {
+        String result = livreurService.scannerQRCode("COMMANDE_5");
+
+        assertTrue(result.contains("5"));
+
+        verify(commandeServiceClient).confirmerLivraison(5L);
+    }
+
+    @Test
+    void testScannerQRCodeInvalid() {
+        assertThrows(RuntimeException.class,
+                () -> livreurService.scannerQRCode("INVALID"));
+    }
+}

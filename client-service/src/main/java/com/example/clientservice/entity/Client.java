@@ -1,5 +1,5 @@
 package com.example.clientservice.entity;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,9 +17,10 @@ public class Client {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String motDePasse;
-
+   
     private String adresse;
     private String telephone;
 }

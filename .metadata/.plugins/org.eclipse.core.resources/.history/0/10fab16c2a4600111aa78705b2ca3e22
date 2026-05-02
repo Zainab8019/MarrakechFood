@@ -1,0 +1,5 @@
+package com.example.livreurservice.config;
+
+public class SecurityConfig {
+
+}

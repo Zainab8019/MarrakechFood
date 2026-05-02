@@ -159,4 +159,81 @@ class LivreurServiceTest {
 
         verify(commandeClient, never()).confirmerLivraison(any());
     }
+    //Test GET BY ID
+    @Test
+    void testGetLivreurByIdExists() {
+        Livreur l = new Livreur(1L, "Ali", "0600", null, StatutLivreur.DISPONIBLE, null, null);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(l));
+
+        Optional<Livreur> result = livreurService.getLivreurById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals("Ali", result.get().getNom());
+    }
+    
+    @Test
+    void testGetLivreurByIdNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        Optional<Livreur> result = livreurService.getLivreurById(1L);
+
+        assertTrue(result.isEmpty());
+    }
+    
+    //Test UPDATE
+    //succes
+    @Test
+    void testUpdateLivreurSuccess() {
+        Livreur existing = new Livreur(1L, "Ali", "0600", null, StatutLivreur.DISPONIBLE, null, null);
+        Livreur updated = new Livreur(null, "AliUpdated", "0700", "email@test.com", null, 10.0, 20.0);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        when(repository.save(any())).thenReturn(existing);
+
+        Livreur result = livreurService.updateLivreur(1L, updated);
+
+        assertEquals("AliUpdated", result.getNom());
+        assertEquals("0700", result.getTelephone());
+        assertEquals("email@test.com", result.getEmail());
+    }
+    
+    //id introuvable
+    
+    @Test
+    void testUpdateLivreurNotFound() {
+        Livreur updated = new Livreur();
+
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> {
+            livreurService.updateLivreur(1L, updated);
+        });
+    }
+    
+    //Test DELETE
+    //succès
+    @Test
+    void testDeleteLivreur() {
+        Long id = 1L;
+
+        doNothing().when(repository).deleteById(id);
+
+        livreurService.deleteLivreur(id);
+
+        verify(repository, times(1)).deleteById(id);
+    }
+    
+    //delete avec erreur
+    @Test
+    void testDeleteLivreurException() {
+        Long id = 1L;
+
+        doThrow(new RuntimeException()).when(repository).deleteById(id);
+
+        assertThrows(RuntimeException.class, () -> {
+            livreurService.deleteLivreur(id);
+        });
+    }
+    
 }

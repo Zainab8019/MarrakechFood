@@ -28,12 +28,16 @@ class RestaurantServiceTest {
     @InjectMocks
     private RestaurantService restaurantService;
 
+    // =========================
     // RESTAURANT TESTS
+    // =========================
 
     @Test
     void testAjouterRestaurant() {
         Restaurant r = new Restaurant();
         r.setNom("Pizza House");
+        r.setAdresse("Casablanca");
+        r.setTelephone("0600000000");
 
         when(restaurantRepository.save(r)).thenReturn(r);
 
@@ -71,10 +75,20 @@ class RestaurantServiceTest {
 
     @Test
     void testGetAllRestaurants() {
-        List<Restaurant> list = List.of(
-                new Restaurant(1L, "R1", "A1", "0600", "desc", 0.0, 0.0, true),
-                new Restaurant(2L, "R2", "A2", "0601", "desc", 0.0, 0.0, true)
-        );
+
+        Restaurant r1 = new Restaurant();
+        r1.setId(1L);
+        r1.setNom("R1");
+        r1.setAdresse("A1");
+        r1.setTelephone("0600000001");
+
+        Restaurant r2 = new Restaurant();
+        r2.setId(2L);
+        r2.setNom("R2");
+        r2.setAdresse("A2");
+        r2.setTelephone("0600000002");
+
+        List<Restaurant> list = List.of(r1, r2);
 
         when(restaurantRepository.findAll()).thenReturn(list);
 
@@ -86,7 +100,11 @@ class RestaurantServiceTest {
 
     @Test
     void testGetRestaurantByIdExists() {
-        Restaurant r = new Restaurant(1L, "Pizza", "Casa", "0600", "desc", 0.0, 0.0, true);
+        Restaurant r = new Restaurant();
+        r.setId(1L);
+        r.setNom("Pizza");
+        r.setAdresse("Casa");
+        r.setTelephone("0600000000");
 
         when(restaurantRepository.findById(1L)).thenReturn(Optional.of(r));
 
@@ -131,11 +149,17 @@ class RestaurantServiceTest {
         verify(restaurantRepository, times(1)).save(r);
     }
 
-    //PLAT TESTS
+    
+    // PLAT TESTS
+    
 
     @Test
     void testAjouterPlat() {
-        Plat plat = new Plat(1L, "Pizza", "desc", 50.0, null);
+        Plat plat = new Plat();
+        plat.setId(1L);
+        plat.setNom("Pizza");
+        plat.setDescription("desc");
+        plat.setPrix(50.0);
 
         when(platRepository.save(plat)).thenReturn(plat);
 
@@ -148,8 +172,17 @@ class RestaurantServiceTest {
 
     @Test
     void testAjouterPlatAvecRestaurant() {
-        Restaurant r = new Restaurant(1L, "Resto", null, null, null, 0.0, 0.0, true);
-        Plat plat = new Plat(1L, "Pizza", "desc", 50.0, r);
+        Restaurant r = new Restaurant();
+        r.setId(1L);
+        r.setNom("Resto");
+        r.setAdresse("Casa");
+
+        Plat plat = new Plat();
+        plat.setId(1L);
+        plat.setNom("Pizza");
+        plat.setDescription("desc");
+        plat.setPrix(50.0);
+        plat.setRestaurant(r);
 
         when(platRepository.save(plat)).thenReturn(plat);
 
@@ -173,8 +206,8 @@ class RestaurantServiceTest {
     @Test
     void testGetPlatsByRestaurant() {
         List<Plat> plats = List.of(
-                new Plat(1L, "Pizza", "desc", 50.0, null),
-                new Plat(2L, "Burger", "desc", 40.0, null)
+                new Plat(),
+                new Plat()
         );
 
         when(platRepository.findByRestaurantId(1L)).thenReturn(plats);
@@ -194,5 +227,4 @@ class RestaurantServiceTest {
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
-
 }

@@ -1,5 +1,7 @@
 package com.example.restaurantservice.entity;
 
+import java.util.Optional;
+
 import jakarta.persistence.*;
 import lombok.*;
 

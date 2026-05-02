@@ -22,6 +22,10 @@ public class LivreurService {
     }
 
     public Livreur ajouterLivreur(Livreur livreur) {
+        if (livreur == null) {
+            throw new IllegalArgumentException("Livreur ne peut pas être null");
+        }
+
         livreur.setStatut(StatutLivreur.DISPONIBLE);
         return repository.save(livreur);
     }

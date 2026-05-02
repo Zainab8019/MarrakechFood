@@ -2,8 +2,11 @@ package com.example.clientservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+<<<<<<< HEAD
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+=======
+>>>>>>> security-commande
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -14,6 +17,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+<<<<<<< HEAD
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -31,4 +35,6 @@ public class SecurityConfig {
 
         return http.build();
     }
+=======
+>>>>>>> security-commande
 }

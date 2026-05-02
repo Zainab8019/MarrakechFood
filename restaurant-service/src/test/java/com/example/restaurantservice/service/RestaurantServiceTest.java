@@ -28,9 +28,7 @@ class RestaurantServiceTest {
     @InjectMocks
     private RestaurantService restaurantService;
 
-    
     // RESTAURANT TESTS
-    
 
     @Test
     void testAjouterRestaurant() {
@@ -44,6 +42,31 @@ class RestaurantServiceTest {
         assertNotNull(result);
         assertEquals("Pizza House", result.getNom());
         verify(restaurantRepository, times(1)).save(r);
+    }
+
+    @Test
+    void testAjouterRestaurantNull() {
+        when(restaurantRepository.save(null))
+                .thenThrow(new IllegalArgumentException("Restaurant cannot be null"));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            restaurantService.ajouterRestaurant(null);
+        });
+
+        verify(restaurantRepository, times(1)).save(null);
+    }
+
+    @Test
+    void testAjouterRestaurantSansNom() {
+        Restaurant r = new Restaurant();
+        r.setNom(null);
+
+        when(restaurantRepository.save(r))
+                .thenThrow(new RuntimeException("Nom obligatoire"));
+
+        assertThrows(RuntimeException.class, () -> {
+            restaurantService.ajouterRestaurant(r);
+        });
     }
 
     @Test
@@ -82,23 +105,33 @@ class RestaurantServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    
-    // CAS LIMITE RESTAURANT
-    
-
     @Test
-    void testAjouterRestaurantNull() {
-        when(restaurantRepository.save(null))
-                .thenThrow(new IllegalArgumentException("Restaurant cannot be null"));
+    void testDeleteRestaurant() {
+        Long id = 1L;
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            restaurantService.ajouterRestaurant(null);
-        });
+        doNothing().when(restaurantRepository).deleteById(id);
+
+        restaurantRepository.deleteById(id);
+
+        verify(restaurantRepository, times(1)).deleteById(id);
     }
 
-    
-    // PLATS TESTS
-    
+    @Test
+    void testNoSaveWhenError() {
+        Restaurant r = new Restaurant();
+        r.setNom(null);
+
+        when(restaurantRepository.save(r))
+                .thenThrow(new RuntimeException());
+
+        assertThrows(RuntimeException.class, () -> {
+            restaurantService.ajouterRestaurant(r);
+        });
+
+        verify(restaurantRepository, times(1)).save(r);
+    }
+
+    //PLAT TESTS
 
     @Test
     void testAjouterPlat() {
@@ -111,6 +144,30 @@ class RestaurantServiceTest {
         assertNotNull(result);
         assertEquals("Pizza", result.getNom());
         verify(platRepository, times(1)).save(plat);
+    }
+
+    @Test
+    void testAjouterPlatAvecRestaurant() {
+        Restaurant r = new Restaurant(1L, "Resto", null, null, null, 0.0, 0.0, true);
+        Plat plat = new Plat(1L, "Pizza", "desc", 50.0, r);
+
+        when(platRepository.save(plat)).thenReturn(plat);
+
+        Plat result = restaurantService.ajouterPlat(plat);
+
+        assertNotNull(result);
+        assertNotNull(result.getRestaurant());
+        assertEquals(1L, result.getRestaurant().getId());
+    }
+
+    @Test
+    void testAjouterPlatNull() {
+        when(platRepository.save(null))
+                .thenThrow(new IllegalArgumentException("Plat cannot be null"));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            restaurantService.ajouterPlat(null);
+        });
     }
 
     @Test
@@ -128,10 +185,6 @@ class RestaurantServiceTest {
         verify(platRepository, times(1)).findByRestaurantId(1L);
     }
 
-    
-    // CAS LIMITE PLAT
-   
-
     @Test
     void testGetPlatsByRestaurantEmpty() {
         when(platRepository.findByRestaurantId(99L)).thenReturn(List.of());
@@ -142,13 +195,4 @@ class RestaurantServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    @Test
-    void testAjouterPlatNull() {
-        when(platRepository.save(null))
-                .thenThrow(new IllegalArgumentException("Plat cannot be null"));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            restaurantService.ajouterPlat(null);
-        });
-    }
 }

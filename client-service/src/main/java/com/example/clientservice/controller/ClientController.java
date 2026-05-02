@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/clients")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ClientController {
 
     private final ClientService clientService;
@@ -29,7 +29,6 @@ public class ClientController {
         Client savedClient = clientService.inscrire(client);
         return ResponseEntity.ok(savedClient);
     }
-
     @PostMapping("/connexion")
     public ResponseEntity<?> connexion(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
@@ -39,13 +38,12 @@ public class ClientController {
                 .map(client -> ResponseEntity.ok(Map.of(
                         "message", "Connexion réussie",
                         "clientId", client.getId(),
-                        "nom", client.getNom(),
                         "email", client.getEmail()
                 )))
-                .orElse(ResponseEntity.status(401).body(Map.of("message", "Email ou mot de passe incorrect")));
+                .orElse(ResponseEntity.status(401)
+                .body(Map.of("message", "Email ou mot de passe incorrect")));
     }
-
-    @GetMapping
+       @GetMapping
     public List<Client> getAllClients() {
         return clientService.getAllClients();
     }

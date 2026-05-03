@@ -1,6 +1,7 @@
 package com.example.restaurantservice.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 @Entity
@@ -15,15 +16,20 @@ public class Restaurant {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Le nom est obligatoire")
     @Column(nullable = false)
     private String nom;
 
+    @NotBlank(message = "L'adresse est obligatoire")
+    @Column(nullable = false)
     private String adresse;
+
+    @Pattern(regexp = "^[0-9]{10}$", message = "Téléphone invalide")
+    @Column(unique = true)
     private String telephone;
-    private String description;
 
-    private Double latitude;
-    private Double longitude;
+    private String typeCuisine;
 
-    private boolean ouvert = true;
+    @Enumerated(EnumType.STRING)
+    private StatutRestaurant statut = StatutRestaurant.OUVERT;
 }

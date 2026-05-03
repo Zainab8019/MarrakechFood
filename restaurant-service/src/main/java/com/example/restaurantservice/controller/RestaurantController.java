@@ -26,8 +26,7 @@ public class RestaurantController {
 
     @PostMapping
     public ResponseEntity<Restaurant> ajouterRestaurant(@RequestBody Restaurant restaurant) {
-        Restaurant saved = restaurantService.ajouterRestaurant(restaurant);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(restaurantService.ajouterRestaurant(restaurant));
     }
 
     @GetMapping
@@ -35,20 +34,47 @@ public class RestaurantController {
         return restaurantService.getAllRestaurants();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Restaurant> getById(@PathVariable Long id) {
+        return restaurantService.getRestaurantById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Restaurant> updateRestaurant(
+            @PathVariable Long id,
+            @RequestBody Restaurant restaurant) {
+
+        return ResponseEntity.ok(
+                restaurantService.updateRestaurant(id, restaurant)
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRestaurant(@PathVariable Long id) {
+        restaurantService.deleteRestaurant(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{restaurantId}/plats")
-    public ResponseEntity<Plat> ajouterPlat(@PathVariable Long restaurantId, @RequestBody Plat plat) {
-        // On associe le plat au restaurant
-        Restaurant restaurant = new Restaurant();
-        restaurant.setId(restaurantId);
+    public ResponseEntity<Plat> ajouterPlat(
+            @PathVariable Long restaurantId,
+            @RequestBody Plat plat) {
+
+        Restaurant restaurant = restaurantService.getRestaurantById(restaurantId)
+                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+
         plat.setRestaurant(restaurant);
-        Plat savedPlat = restaurantService.ajouterPlat(plat);
-        return ResponseEntity.ok(savedPlat);
+
+        return ResponseEntity.ok(restaurantService.ajouterPlat(plat));
     }
 
     @GetMapping("/{restaurantId}/plats")
     public List<Plat> getPlatsByRestaurant(@PathVariable Long restaurantId) {
         return restaurantService.getPlatsByRestaurant(restaurantId);
     }
+
     @GetMapping("/{id}/exists")
     public boolean exists(@PathVariable Long id) {
         return restaurantService.getRestaurantById(id).isPresent();

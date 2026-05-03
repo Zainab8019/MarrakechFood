@@ -28,14 +28,16 @@ class RestaurantServiceTest {
     @InjectMocks
     private RestaurantService restaurantService;
 
-    
+    // =========================
     // RESTAURANT TESTS
-    
+    // =========================
 
     @Test
     void testAjouterRestaurant() {
         Restaurant r = new Restaurant();
         r.setNom("Pizza House");
+        r.setAdresse("Casablanca");
+        r.setTelephone("0600000000");
 
         when(restaurantRepository.save(r)).thenReturn(r);
 
@@ -47,11 +49,46 @@ class RestaurantServiceTest {
     }
 
     @Test
+    void testAjouterRestaurantNull() {
+        when(restaurantRepository.save(null))
+                .thenThrow(new IllegalArgumentException("Restaurant cannot be null"));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            restaurantService.ajouterRestaurant(null);
+        });
+
+        verify(restaurantRepository, times(1)).save(null);
+    }
+
+    @Test
+    void testAjouterRestaurantSansNom() {
+        Restaurant r = new Restaurant();
+        r.setNom(null);
+
+        when(restaurantRepository.save(r))
+                .thenThrow(new RuntimeException("Nom obligatoire"));
+
+        assertThrows(RuntimeException.class, () -> {
+            restaurantService.ajouterRestaurant(r);
+        });
+    }
+
+    @Test
     void testGetAllRestaurants() {
-        List<Restaurant> list = List.of(
-                new Restaurant(1L, "R1", "A1", "0600", "desc", 0.0, 0.0, true),
-                new Restaurant(2L, "R2", "A2", "0601", "desc", 0.0, 0.0, true)
-        );
+
+        Restaurant r1 = new Restaurant();
+        r1.setId(1L);
+        r1.setNom("R1");
+        r1.setAdresse("A1");
+        r1.setTelephone("0600000001");
+
+        Restaurant r2 = new Restaurant();
+        r2.setId(2L);
+        r2.setNom("R2");
+        r2.setAdresse("A2");
+        r2.setTelephone("0600000002");
+
+        List<Restaurant> list = List.of(r1, r2);
 
         when(restaurantRepository.findAll()).thenReturn(list);
 
@@ -63,7 +100,11 @@ class RestaurantServiceTest {
 
     @Test
     void testGetRestaurantByIdExists() {
-        Restaurant r = new Restaurant(1L, "Pizza", "Casa", "0600", "desc", 0.0, 0.0, true);
+        Restaurant r = new Restaurant();
+        r.setId(1L);
+        r.setNom("Pizza");
+        r.setAdresse("Casa");
+        r.setTelephone("0600000000");
 
         when(restaurantRepository.findById(1L)).thenReturn(Optional.of(r));
 
@@ -82,27 +123,43 @@ class RestaurantServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    
-    // CAS LIMITE RESTAURANT
-    
+    @Test
+    void testDeleteRestaurant() {
+        Long id = 1L;
+
+        doNothing().when(restaurantRepository).deleteById(id);
+
+        restaurantRepository.deleteById(id);
+
+        verify(restaurantRepository, times(1)).deleteById(id);
+    }
 
     @Test
-    void testAjouterRestaurantNull() {
-        when(restaurantRepository.save(null))
-                .thenThrow(new IllegalArgumentException("Restaurant cannot be null"));
+    void testNoSaveWhenError() {
+        Restaurant r = new Restaurant();
+        r.setNom(null);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            restaurantService.ajouterRestaurant(null);
+        when(restaurantRepository.save(r))
+                .thenThrow(new RuntimeException());
+
+        assertThrows(RuntimeException.class, () -> {
+            restaurantService.ajouterRestaurant(r);
         });
+
+        verify(restaurantRepository, times(1)).save(r);
     }
 
     
-    // PLATS TESTS
+    // PLAT TESTS
     
 
     @Test
     void testAjouterPlat() {
-        Plat plat = new Plat(1L, "Pizza", "desc", 50.0, null);
+        Plat plat = new Plat();
+        plat.setId(1L);
+        plat.setNom("Pizza");
+        plat.setDescription("desc");
+        plat.setPrix(50.0);
 
         when(platRepository.save(plat)).thenReturn(plat);
 
@@ -114,32 +171,26 @@ class RestaurantServiceTest {
     }
 
     @Test
-    void testGetPlatsByRestaurant() {
-        List<Plat> plats = List.of(
-                new Plat(1L, "Pizza", "desc", 50.0, null),
-                new Plat(2L, "Burger", "desc", 40.0, null)
-        );
+    void testAjouterPlatAvecRestaurant() {
+        Restaurant r = new Restaurant();
+        r.setId(1L);
+        r.setNom("Resto");
+        r.setAdresse("Casa");
 
-        when(platRepository.findByRestaurantId(1L)).thenReturn(plats);
+        Plat plat = new Plat();
+        plat.setId(1L);
+        plat.setNom("Pizza");
+        plat.setDescription("desc");
+        plat.setPrix(50.0);
+        plat.setRestaurant(r);
 
-        List<Plat> result = restaurantService.getPlatsByRestaurant(1L);
+        when(platRepository.save(plat)).thenReturn(plat);
 
-        assertEquals(2, result.size());
-        verify(platRepository, times(1)).findByRestaurantId(1L);
-    }
-
-    
-    // CAS LIMITE PLAT
-   
-
-    @Test
-    void testGetPlatsByRestaurantEmpty() {
-        when(platRepository.findByRestaurantId(99L)).thenReturn(List.of());
-
-        List<Plat> result = restaurantService.getPlatsByRestaurant(99L);
+        Plat result = restaurantService.ajouterPlat(plat);
 
         assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertNotNull(result.getRestaurant());
+        assertEquals(1L, result.getRestaurant().getId());
     }
 
     @Test
@@ -150,5 +201,30 @@ class RestaurantServiceTest {
         assertThrows(IllegalArgumentException.class, () -> {
             restaurantService.ajouterPlat(null);
         });
+    }
+
+    @Test
+    void testGetPlatsByRestaurant() {
+        List<Plat> plats = List.of(
+                new Plat(),
+                new Plat()
+        );
+
+        when(platRepository.findByRestaurantId(1L)).thenReturn(plats);
+
+        List<Plat> result = restaurantService.getPlatsByRestaurant(1L);
+
+        assertEquals(2, result.size());
+        verify(platRepository, times(1)).findByRestaurantId(1L);
+    }
+
+    @Test
+    void testGetPlatsByRestaurantEmpty() {
+        when(platRepository.findByRestaurantId(99L)).thenReturn(List.of());
+
+        List<Plat> result = restaurantService.getPlatsByRestaurant(99L);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 }

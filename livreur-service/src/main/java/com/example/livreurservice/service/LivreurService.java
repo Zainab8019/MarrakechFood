@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.livreurservice.exception.LivreurNotAvailableException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class LivreurService {
@@ -22,6 +23,10 @@ public class LivreurService {
     }
 
     public Livreur ajouterLivreur(Livreur livreur) {
+        if (livreur == null) {
+            throw new IllegalArgumentException("Livreur ne peut pas être null");
+        }
+
         livreur.setStatut(StatutLivreur.DISPONIBLE);
         return repository.save(livreur);
     }
@@ -74,6 +79,24 @@ public class LivreurService {
             throw new RuntimeException("Erreur lors du scan du QR Code : " + e.getMessage());
         }
     }
+    public Optional<Livreur> getLivreurById(Long id) {
+        return repository.findById(id);
+    }
     
+    public void deleteLivreur(Long id) {
+        repository.deleteById(id);
+    }
+    public Livreur updateLivreur(Long id, Livreur updated) {
+        Livreur l = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livreur non trouvé"));
+
+        l.setNom(updated.getNom());
+        l.setTelephone(updated.getTelephone());
+        l.setEmail(updated.getEmail());
+        l.setLatitude(updated.getLatitude());
+        l.setLongitude(updated.getLongitude());
+
+        return repository.save(l);
+    }
     
 }

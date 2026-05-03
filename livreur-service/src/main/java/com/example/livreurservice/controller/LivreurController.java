@@ -53,4 +53,28 @@ public class LivreurController {
         String message = livreurService.scannerQRCode(qrCodeData);
         return ResponseEntity.ok(message);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Livreur> getById(@PathVariable Long id) {
+        return livreurService.getLivreurById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    //update
+    
+    @PutMapping("/{id}")
+    public ResponseEntity<Livreur> updateLivreur(
+            @PathVariable Long id,
+            @RequestBody Livreur livreur) {
+
+        return ResponseEntity.ok(livreurService.updateLivreur(id, livreur));
+    }
+    //suppression
+    
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteLivreur(@PathVariable Long id) {
+        livreurService.deleteLivreur(id);
+        return ResponseEntity.ok("Livreur supprimé");
+    }
+    
+    
 }

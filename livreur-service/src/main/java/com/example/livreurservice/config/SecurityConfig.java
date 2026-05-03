@@ -16,8 +16,13 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/livreurs/**").permitAll()
+
+                // public (pour tester)
                 .requestMatchers("/api/livreurs/test").permitAll()
+
+                // sécurisé
+                .requestMatchers("/api/livreurs/**").authenticated()
+
                 .anyRequest().authenticated()
             )
             .httpBasic();

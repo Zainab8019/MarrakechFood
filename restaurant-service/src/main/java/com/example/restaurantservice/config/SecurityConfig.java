@@ -16,9 +16,13 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/restaurants/**").permitAll()
-                .requestMatchers("/api/livreurs/**").permitAll()
+
+                // endpoint test public
                 .requestMatchers("/api/restaurants/test").permitAll()
+
+                // tout le reste sécurisé
+                .requestMatchers("/api/restaurants/**").authenticated()
+
                 .anyRequest().authenticated()
             )
             .httpBasic();

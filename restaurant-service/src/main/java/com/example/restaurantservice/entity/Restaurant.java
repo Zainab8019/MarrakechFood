@@ -3,6 +3,10 @@ package com.example.restaurantservice.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "restaurants")
@@ -32,4 +36,11 @@ public class Restaurant {
 
     @Enumerated(EnumType.STRING)
     private StatutRestaurant statut = StatutRestaurant.OUVERT;
+
+    
+   
+   
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Plat> plats;
 }

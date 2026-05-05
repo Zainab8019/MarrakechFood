@@ -1,23 +1,30 @@
 package com.example.clientservice.service;
+
 import com.example.clientservice.entity.Client;
 import com.example.clientservice.repository.ClientRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.util.List;
 import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 class ClientServiceTest {
+
     @Mock
     private ClientRepository repository;
+
     @InjectMocks
     private ClientService clientService;
-    // ==================== TESTS INSCRIPTION ====================
+
+    // ==================== INSCRIPTION ====================
+
     @Test
     void testInscrireSuccess() {
         Client client = new Client(null, "Jihane", "jihane@gmail.com", "1234", null, null);
@@ -29,6 +36,7 @@ class ClientServiceTest {
 
         assertNotNull(result);
         assertEquals("jihane@gmail.com", result.getEmail());
+
         verify(repository).save(any(Client.class));
     }
 
@@ -38,10 +46,13 @@ class ClientServiceTest {
 
         when(repository.findByEmail(client.getEmail())).thenReturn(Optional.of(client));
 
-        assertThrows(RuntimeException.class, () -> clientService.inscrire(client));
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> clientService.inscrire(client));
+
+        assertEquals("Email déjà utilisé", ex.getMessage());
     }
 
-    // ==================== TESTS CONNEXION ====================
+    // ==================== CONNEXION ====================
 
     @Test
     void testConnexionSuccess() {
@@ -74,7 +85,7 @@ class ClientServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // ==================== AUTRES TESTS ====================
+    // ==================== GET ALL ====================
 
     @Test
     void testGetAllClients() {
@@ -89,6 +100,8 @@ class ClientServiceTest {
 
         assertEquals(2, result.size());
     }
+
+    // ==================== GET BY ID ====================
 
     @Test
     void testGetClientByIdExists() {
@@ -110,9 +123,12 @@ class ClientServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    // ==================== DELETE ====================
+
     @Test
     void testDeleteClient() {
         Long id = 1L;
+
         doNothing().when(repository).deleteById(id);
 
         clientService.deleteClient(id);

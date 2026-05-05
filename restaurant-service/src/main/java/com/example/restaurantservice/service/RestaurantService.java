@@ -54,8 +54,16 @@ public class RestaurantService {
     public Plat ajouterPlat(Plat plat) {
         return platRepository.save(plat);
     }
+    
 
+    
     public List<Plat> getPlatsByRestaurant(Long restaurantId) {
         return platRepository.findByRestaurantId(restaurantId);
+    }
+    public void deletePlat(Long platId) {
+        Plat plat = platRepository.findById(platId)
+                .orElseThrow(() -> new RuntimeException("Plat not found"));
+
+        platRepository.delete(plat);
     }
 }

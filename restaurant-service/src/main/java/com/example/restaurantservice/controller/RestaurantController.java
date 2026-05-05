@@ -33,6 +33,11 @@ public class RestaurantController {
     public List<Restaurant> getAllRestaurants() {
         return restaurantService.getAllRestaurants();
     }
+    @DeleteMapping("/plats/{platId}")
+    public ResponseEntity<Void> deletePlat(@PathVariable Long platId) {
+        restaurantService.deletePlat(platId);
+        return ResponseEntity.noContent().build();
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<Restaurant> getById(@PathVariable Long id) {

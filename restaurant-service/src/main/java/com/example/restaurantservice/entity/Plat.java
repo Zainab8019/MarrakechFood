@@ -1,9 +1,9 @@
 package com.example.restaurantservice.entity;
 
-import java.util.Optional;
-
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "plats")
@@ -23,7 +23,9 @@ public class Plat {
     private String description;
     private Double prix;
 
-    @ManyToOne
-    @JoinColumn(name = "restaurant_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    @JsonIgnore
+    
     private Restaurant restaurant;
 }

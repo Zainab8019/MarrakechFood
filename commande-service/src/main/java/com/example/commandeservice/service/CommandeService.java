@@ -81,14 +81,14 @@ public class CommandeService {
             throw new RuntimeException("La commande ne peut pas être validée");
         }
 
-        // 🔥 FIX RELATION JPA (IMPORTANT)
-        if (commande.getItems() != null) {
+        //  FIX RELATION JPA (IMPORTANT)
+      /*  if (commande.getItems() != null) {
             for (CommandeItem item : commande.getItems()) {
                 item.setCommande(commande);
             }
-        }
+        }*/
 
-        // ✅ AJOUT QR CODE SÉCURISÉ
+        //  AJOUT QR CODE SÉCURISÉ
         try {
             String qrData = "COMMANDE_" + commande.getId();
             String qrBase64 = QRCodeGenerator.generateQRCode(qrData);

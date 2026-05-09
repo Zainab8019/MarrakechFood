@@ -1,5 +1,6 @@
 package com.example.commandeservice.service;
 
+import com.example.commandeservice.CommandeServiceApplication;
 import com.example.commandeservice.client.ClientServiceClient;
 import com.example.commandeservice.client.RestaurantServiceClient;
 import com.example.commandeservice.entity.Commande;
@@ -25,7 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+classes = CommandeServiceApplication.class)
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class CommandeServiceIntegrationTest {

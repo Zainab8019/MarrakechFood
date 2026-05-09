@@ -1,5 +1,6 @@
 package com.example.clientservice.service;
 
+import com.example.clientservice.ClientServiceApplication;
 import com.example.clientservice.entity.Client;
 import com.example.clientservice.repository.ClientRepository;
 import org.junit.jupiter.api.*;
@@ -18,7 +19,8 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = ClientServiceApplication.class)
 @ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ClientIntegrationTest {

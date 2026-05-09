@@ -1,5 +1,6 @@
 package com.example.restaurantservice.service;
 
+import com.example.restaurantservice.RestaurantServiceApplication;
 import com.example.restaurantservice.entity.Plat;
 import com.example.restaurantservice.entity.Restaurant;
 import com.example.restaurantservice.entity.StatutRestaurant;
@@ -16,7 +17,8 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+classes = RestaurantServiceApplication.class)
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
     "spring.datasource.url=jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_UPPER=false",

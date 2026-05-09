@@ -1,5 +1,6 @@
 package com.example.livreurservice.service;
 
+import com.example.livreurservice.LivreurServiceApplication;
 import com.example.livreurservice.entity.Livreur;
 import com.example.livreurservice.entity.StatutLivreur;
 
@@ -8,18 +9,33 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+classes = LivreurServiceApplication.class)
+@ActiveProfiles("test")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-// Suppression de @Import(TestSecurityConfig.class)
 class LivreurServiceIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
 
     private static Long id;
+
+    //  Ce bloc force l'utilisation de H2 au lieu de MySQL
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", () -> "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MySQL");
+        registry.add("spring.datasource.driver-class-name", () -> "org.h2.Driver");
+        registry.add("spring.datasource.username", () -> "sa");
+        registry.add("spring.datasource.password", () -> "");
+        registry.add("spring.jpa.database-platform", () -> "org.hibernate.dialect.H2Dialect");
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "create-drop");
+    }
 
     // =========================
     // 1. TEST ENDPOINT

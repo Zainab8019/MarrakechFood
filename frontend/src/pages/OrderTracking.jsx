@@ -7,6 +7,7 @@ function OrderTracking() {
   const navigate = useNavigate();
   const [commande, setCommande] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [validating, setValidating] = useState(false); // Ajout
 
   useEffect(() => {
     fetchCommande();
@@ -21,6 +22,20 @@ function OrderTracking() {
       alert('Erreur chargement commande');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleValider = async () => {
+    setValidating(true);
+    try {
+      await commandeAPI.valider(id);
+      alert('Commande validée avec succès ! QR code généré.');
+      fetchCommande(); // Recharge pour afficher le QR code
+    } catch (err) {
+      console.error(err);
+      alert('Erreur lors de la validation : ' + (err.response?.data?.error || err.message));
+    } finally {
+      setValidating(false);
     }
   };
 
@@ -40,7 +55,28 @@ function OrderTracking() {
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 20 }}>
       <h1 style={{ color: '#FF6B35' }}>📦 Suivi commande #{commande?.id}</h1>
       
-      {/* Barre de progression des statuts */}
+      {/*bouton visible seulement si commande en attente */}
+      {commande?.statut === 'EN_ATTENTE' && (
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <button
+            onClick={handleValider}
+            disabled={validating}
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: 5,
+              cursor: validating ? 'not-allowed' : 'pointer',
+              fontSize: 16
+            }}
+          >
+            {validating ? 'Validation...' : 'Valider la commande'}
+          </button>
+        </div>
+      )}
+      
+      {/* Barre de progression */}
       <div style={{ marginTop: 30 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span>📝 En attente</span>
@@ -55,21 +91,25 @@ function OrderTracking() {
       </div>
       
       {/* QR Code */}
-      {commande?.qrCodeBase64 && (
+      {commande?.qrCodeBase64 ? (
         <div style={{ textAlign: 'center', marginTop: 30 }}>
-          <h3>QR Code de la commande</h3>
+          <h3>📱 QR Code de la commande</h3>
           <img 
             src={`data:image/png;base64,${commande.qrCodeBase64}`} 
             alt="QR Code"
             style={{ width: 200, height: 200, border: '1px solid #ddd', borderRadius: 10 }}
           />
-          <p>Montrez ce QR code au livreur</p>
+          <p>Présentez ce QR code au livreur</p>
+        </div>
+      ) : (
+        <div style={{ textAlign: 'center', marginTop: 30, padding: 20, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
+          <p>⏳ Le QR code sera généré après validation de la commande</p>
         </div>
       )}
       
       {/* Infos commande */}
       <div style={{ marginTop: 30, padding: 20, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
-        <h3>Détails commande</h3>
+        <h3>📋 Détails commande</h3>
         <p><strong>Statut :</strong> {commande?.statut}</p>
         <p><strong>Total :</strong> {commande?.total} DH</p>
         <p><strong>Adresse :</strong> {commande?.adresseLivraison}</p>
@@ -78,7 +118,7 @@ function OrderTracking() {
       
       <button 
         onClick={() => navigate('/restaurants')}
-        style={{ marginTop: 20, padding: 10, cursor: 'pointer' }}
+        style={{ marginTop: 20, padding: 10, cursor: 'pointer', background: 'none', border: '1px solid #FF6B35', borderRadius: 5 }}
       >
         ← Retour aux restaurants
       </button>

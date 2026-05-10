@@ -1,14 +1,13 @@
 import axios from 'axios';
 
-// Configuration des URLs de vos microservices
 const API_CONFIG = {
   client: 'http://localhost:8089',
   restaurant: 'http://localhost:8083',
-  commande: 'http://localhost:8091',
+  commande: 'http://localhost:8091',   
   livreur: 'http://localhost:8085'
 };
 
-// Client Service (Authentification)
+// Client Service
 export const clientAPI = {
   login: (data) => axios.post(`${API_CONFIG.client}/api/clients/connexion`, data),
   register: (data) => axios.post(`${API_CONFIG.client}/api/clients/inscrire`, data),
@@ -33,7 +32,7 @@ export const commandeAPI = {
 // Livreur Service
 export const livreurAPI = {
   getDisponibles: () => axios.get(`${API_CONFIG.livreur}/api/livreurs/disponibles`),
-  scanQR: (qrData) => axios.post(`${API_CONFIG.livreur}/api/livreurs/scan-jr`, { qrCodeData: qrData })
+  scanQR: (qrData) => axios.post(`${API_CONFIG.livreur}/api/livreurs/scan-qr`, { qrCodeData: qrData })
 };
 
 export default {

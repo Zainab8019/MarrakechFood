@@ -4,6 +4,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import RestaurantList from './pages/RestaurantList';
 import RestaurantDetail from './pages/RestaurantDetail';
+import Cart from './pages/Cart';
+import OrderTracking from './pages/OrderTracking';
+
 function App() {
   const isAuthenticated = !!localStorage.getItem('clientId');
 
@@ -14,7 +17,9 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/restaurants" element={<RestaurantList />} />
-        <Route path="/restaurants/:id" element={<RestaurantDetail />} />
+        <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/order-tracking/:id" element={<OrderTracking />} />
       </Routes>
     </BrowserRouter>
   );

@@ -7,7 +7,7 @@ function OrderTracking() {
   const navigate = useNavigate();
   const [commande, setCommande] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [validating, setValidating] = useState(false); // Ajout
+  const [validating, setValidating] = useState(false);
 
   useEffect(() => {
     fetchCommande();
@@ -30,7 +30,7 @@ function OrderTracking() {
     try {
       await commandeAPI.valider(id);
       alert('Commande validée avec succès ! QR code généré.');
-      fetchCommande(); // Recharge pour afficher le QR code
+      fetchCommande();
     } catch (err) {
       console.error(err);
       alert('Erreur lors de la validation : ' + (err.response?.data?.error || err.message));
@@ -55,7 +55,6 @@ function OrderTracking() {
     <div style={{ maxWidth: 600, margin: '0 auto', padding: 20 }}>
       <h1 style={{ color: '#FF6B35' }}>📦 Suivi commande #{commande?.id}</h1>
       
-      {/*bouton visible seulement si commande en attente */}
       {commande?.statut === 'EN_ATTENTE' && (
         <div style={{ textAlign: 'center', marginBottom: 20 }}>
           <button
@@ -76,7 +75,6 @@ function OrderTracking() {
         </div>
       )}
       
-      {/* Barre de progression */}
       <div style={{ marginTop: 30 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
           <span>📝 En attente</span>
@@ -90,7 +88,6 @@ function OrderTracking() {
         </div>
       </div>
       
-      {/* QR Code */}
       {commande?.qrCodeBase64 ? (
         <div style={{ textAlign: 'center', marginTop: 30 }}>
           <h3>📱 QR Code de la commande</h3>
@@ -100,6 +97,10 @@ function OrderTracking() {
             style={{ width: 200, height: 200, border: '1px solid #ddd', borderRadius: 10 }}
           />
           <p>Présentez ce QR code au livreur</p>
+          {/* Affichage du texte du QR code pour éviter les erreurs de saisie */}
+          <p style={{ fontSize: 14, fontFamily: 'monospace', marginTop: 5, backgroundColor: '#f5f5f5', padding: 8, borderRadius: 5 }}>
+            Code : COMMANDE_{commande.id}
+          </p>
         </div>
       ) : (
         <div style={{ textAlign: 'center', marginTop: 30, padding: 20, backgroundColor: '#f0f0f0', borderRadius: 8 }}>
@@ -107,7 +108,6 @@ function OrderTracking() {
         </div>
       )}
       
-      {/* Infos commande */}
       <div style={{ marginTop: 30, padding: 20, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
         <h3>📋 Détails commande</h3>
         <p><strong>Statut :</strong> {commande?.statut}</p>

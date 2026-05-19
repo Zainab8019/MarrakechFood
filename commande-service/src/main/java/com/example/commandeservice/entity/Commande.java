@@ -9,9 +9,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "commandes")
-@Getter 
-@Setter 
-@NoArgsConstructor 
+@Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
 public class Commande {
 
@@ -24,26 +24,20 @@ public class Commande {
     private Long livreurId;
 
     @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     private List<CommandeItem> items = new ArrayList<>();
 
     private Double total = 0.0;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private StatutCommande statut = StatutCommande.EN_ATTENTE;
 
     private String adresseLivraison;
-    private LocalDateTime dateCommande = LocalDateTime.now();
+
+    private LocalDateTime dateCommande;
+
     private LocalDateTime dateLivraison;
 
     @Column(length = 10000)
     private String qrCodeBase64;
-
-    // ==================== MÉTHODE IMPORTANTE ====================
-    public void addItem(CommandeItem item) {
-        if (item != null) {
-            this.items.add(item);
-            // On ne met pas item.setCommande(this) ici pour éviter la boucle
-        }
-    }
 }

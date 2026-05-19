@@ -29,7 +29,6 @@ function App() {
     window.location.href = '/login';
   };
 
-  // Styles pour la navigation
   const navStyle = {
     backgroundColor: '#FF6B35',
     padding: '10px 20px',
@@ -48,7 +47,6 @@ function App() {
 
   return (
     <BrowserRouter>
-      {/* Barre de navigation */}
       {isAuthenticated && (
         <div style={navStyle}>
           <div style={{ fontWeight: 'bold', fontSize: 20 }}>
@@ -58,7 +56,6 @@ function App() {
             <Link to="/restaurants" style={linkStyle}>🏠 Accueil</Link>
             <Link to="/cart" style={linkStyle}>🛒 Panier</Link>
             
-            {/* Menu Admin (visible seulement si rôle admin) */}
             {userRole === 'ADMIN' && (
               <>
                 <Link to="/admin/restaurant/add" style={linkStyle}>➕ Ajouter restaurant</Link>
@@ -66,11 +63,9 @@ function App() {
               </>
             )}
             
-            {/* Menu Livreur (visible seulement si rôle livreur) */}
             {userRole === 'LIVREUR' && (
               <>
                 <Link to="/livreur/dashboard" style={linkStyle}>🚚 Commandes à livrer</Link>
-                <Link to="/livreur/historique" style={linkStyle}>📜 Historique</Link>
               </>
             )}
             
@@ -90,14 +85,12 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/order-tracking/:id" element={<OrderTracking />} />
         
-        {/* Routes Admin */}
         <Route path="/admin/restaurant/add" element={<AdminRestaurantForm />} />
         <Route path="/admin/restaurant/edit/:id" element={<AdminRestaurantForm />} />
         <Route path="/admin/restaurants" element={<RestaurantList isAdmin={true} />} />
         <Route path="/admin/plat/add/:restaurantId" element={<AdminPlatForm />} />
         <Route path="/admin/plat/edit/:platId/restaurant/:restaurantId" element={<AdminPlatForm />} />
         
-        {/* Routes Livreur */}
         <Route path="/livreur/dashboard" element={<LivreurDashboard />} />
         <Route path="/livreur/scan/:commandeId" element={<QRScanner />} />
       </Routes>

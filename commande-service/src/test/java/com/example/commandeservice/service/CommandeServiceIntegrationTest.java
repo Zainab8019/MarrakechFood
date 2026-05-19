@@ -296,4 +296,18 @@ class CommandeServiceIntegrationTest {
         
         return commande;
     }
+    @Test
+    @Order(9)
+    void testGetByStatut() {
+        // Créer une commande validée
+        Commande commande = creerCommandeTest();
+        ResponseEntity<Commande> created = restTemplate.postForEntity("/api/commandes", commande, Commande.class);
+        Long id = created.getBody().getId();
+        restTemplate.put("/api/commandes/" + id + "/valider", null);
+        
+        // Tester l'endpoint
+        ResponseEntity<Commande[]> response = restTemplate.getForEntity("/api/commandes/statut/VALIDEE", Commande[].class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotEmpty();
+    }
 }

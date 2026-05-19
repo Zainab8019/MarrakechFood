@@ -103,15 +103,14 @@ function Login({ setIsAuthenticated, setUserRole }) {
         >
           {loading ? 'Connexion...' : 'Se connecter'}
         </button>
-      </form>
-      
-      {/* Section comptes de test */}
-      <div style={{ marginTop: 20, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 }}>
-        <p style={{ fontSize: 12, margin: 0, color: '#666' }}>🔐 Comptes de test :</p>
-        <p style={{ fontSize: 12, margin: 5, color: '#666' }}>👤 Client : client@test.com / 1234</p>
-        <p style={{ fontSize: 12, margin: 5, color: '#666' }}>👑 Admin : admin@marrakechfood.com / 1234</p>
-        <p style={{ fontSize: 12, margin: 5, color: '#666' }}>🚚 Livreur : livreur@marrakechfood.com / 1234</p>
-      </div>
+        <hr />
+<button 
+  onClick={() => navigate('/livreur/dashboard')}
+  style={{ marginTop: 10, background: '#6c757d', color: 'white', padding: 8, borderRadius: 5, border: 'none', cursor: 'pointer' }}
+>
+  🚚 Mode Livreur
+</button>
+      </form>    
       
       <p style={{ textAlign: 'center', marginTop: 20 }}>
         Pas de compte ?{' '}

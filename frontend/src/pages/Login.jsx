@@ -71,6 +71,13 @@ function Login() {
         >
           {loading ? 'Connexion...' : 'Se connecter'}
         </button>
+        <hr />
+<button 
+  onClick={() => navigate('/livreur/dashboard')}
+  style={{ marginTop: 10, background: '#6c757d', color: 'white', padding: 8, borderRadius: 5, border: 'none', cursor: 'pointer' }}
+>
+  🚚 Mode Livreur
+</button>
       </form>
       
       <p style={{ textAlign: 'center', marginTop: 20 }}>

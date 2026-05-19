@@ -41,18 +41,22 @@ public class LivreurService {
 
     @Transactional
     public Livreur assignerALaCommande(Long commandeId) {
-        List<Livreur> disponibles = getLivreursDisponibles();
+
+        List<Livreur> disponibles = repository.findByStatut(StatutLivreur.DISPONIBLE);
 
         if (disponibles.isEmpty()) {
-        	throw new LivreurNotAvailableException("Aucun livreur disponible pour le moment");        }
+            throw new RuntimeException("Aucun livreur disponible");
+        }
 
         Livreur livreur = disponibles.get(0);
-        livreur.setStatut(StatutLivreur.OCCUPE);
 
-        // Notifier le commande-service
+        // IMPORTANT
+        livreur.setStatut(StatutLivreur.OCCUPE);
+        repository.save(livreur);
+
         commandeServiceClient.assignerLivreur(commandeId, livreur.getId());
 
-        return repository.save(livreur);
+        return livreur;
     }
 
     public void changerStatut(Long id, StatutLivreur statut) {
@@ -64,20 +68,40 @@ public class LivreurService {
    
     @Transactional
     public String scannerQRCode(String qrCodeData) {
-        try {
-            if (!qrCodeData.startsWith("COMMANDE_")) {
-                throw new RuntimeException("Format de QR Code invalide");
-            }
 
-            String[] parts = qrCodeData.split("_");
-            Long commandeId = Long.parseLong(parts[1]);
-            
-            commandeServiceClient.confirmerLivraison(commandeId);
-            return "Livraison confirmée avec succès pour la commande N° " + commandeId;
-
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors du scan du QR Code : " + e.getMessage());
+        if (qrCodeData == null || qrCodeData.isBlank()) {
+            throw new RuntimeException("QR vide");
         }
+
+        // 🔥 nettoyage TOTAL (important pour React + Postman)
+        qrCodeData = qrCodeData.trim()
+                .replace("\"", "")
+                .replace("\n", "")
+                .replace("\r", "");
+
+        System.out.println("QR REÇU = [" + qrCodeData + "]");
+
+        if (!qrCodeData.startsWith("COMMANDE_")) {
+            throw new RuntimeException("QR invalide (format attendu: COMMANDE_ID)");
+        }
+
+        String[] parts = qrCodeData.split("_");
+
+        if (parts.length != 2) {
+            throw new RuntimeException("QR mal formaté");
+        }
+
+        Long commandeId;
+
+        try {
+            commandeId = Long.parseLong(parts[1]);
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("ID commande invalide dans QR");
+        }
+
+        commandeServiceClient.confirmerLivraison(commandeId);
+
+        return "Livraison confirmée commande " + commandeId;
     }
     public Optional<Livreur> getLivreurById(Long id) {
         return repository.findById(id);

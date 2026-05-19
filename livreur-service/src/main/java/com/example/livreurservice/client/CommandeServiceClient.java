@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
-@FeignClient(name = "commande-service", url = "http://localhost:8084")
+@FeignClient(name = "commande-service", url = "http://localhost:8091")
 public interface CommandeServiceClient {
 
     @PutMapping("/api/commandes/{commandeId}/assigner/{livreurId}")

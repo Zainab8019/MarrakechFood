@@ -48,9 +48,13 @@ public class LivreurController {
     public ResponseEntity<Livreur> assignerALaCommande(@PathVariable Long commandeId) {
         return ResponseEntity.ok(livreurService.assignerALaCommande(commandeId));
     }
-    @PostMapping("/scan-qr")
+    @PostMapping(value = "/scan-qr", consumes = "text/plain", produces = "text/plain")
     public ResponseEntity<String> scannerQR(@RequestBody String qrCodeData) {
+
+        System.out.println("RAW RECU = [" + qrCodeData + "]");
+
         String message = livreurService.scannerQRCode(qrCodeData);
+
         return ResponseEntity.ok(message);
     }
     @GetMapping("/{id}")

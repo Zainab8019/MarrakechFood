@@ -197,4 +197,19 @@ class CommandeServiceTest {
         assertThrows(RuntimeException.class,
                 () -> commandeService.confirmerLivraison(1L));
     }
+    @Test
+    void testGetCommandesByStatut() {
+        Commande cmd1 = new Commande();
+        cmd1.setStatut(StatutCommande.VALIDEE);
+        Commande cmd2 = new Commande();
+        cmd2.setStatut(StatutCommande.EN_ATTENTE);
+        
+        when(repository.findByStatut(StatutCommande.VALIDEE))
+            .thenReturn(List.of(cmd1));
+        
+        List<Commande> result = commandeService.getCommandesByStatut(StatutCommande.VALIDEE);
+        
+        assertEquals(1, result.size());
+        assertEquals(StatutCommande.VALIDEE, result.get(0).getStatut());
+    }
 }

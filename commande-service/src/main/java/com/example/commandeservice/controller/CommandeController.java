@@ -1,6 +1,7 @@
 package com.example.commandeservice.controller;
 
 import com.example.commandeservice.entity.Commande;
+import com.example.commandeservice.entity.StatutCommande;
 import com.example.commandeservice.service.CommandeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,9 +57,14 @@ public class CommandeController {
         Commande commande = commandeService.assignerLivreur(commandeId, livreurId);
         return ResponseEntity.ok(commande);
     }
+    
     @PutMapping("/{commandeId}/confirmer-livraison")
     public ResponseEntity<Commande> confirmerLivraison(@PathVariable Long commandeId) {
         Commande commande = commandeService.confirmerLivraison(commandeId);
         return ResponseEntity.ok(commande);
+    }
+    @GetMapping("/statut/{statut}")
+    public List<Commande> getByStatut(@PathVariable StatutCommande statut) {
+        return commandeService.getCommandesByStatut(statut);
     }
 }

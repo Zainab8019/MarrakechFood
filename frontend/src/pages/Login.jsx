@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientAPI } from '../services/api';
 
-function Login() {
+function Login({ setIsAuthenticated, setUserRole }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,10 +16,39 @@ function Login() {
 
     try {
       const response = await clientAPI.login({ email, motDePasse: password });
+      
+      // Stocker les infos de base
       localStorage.setItem('clientId', response.data.clientId);
       localStorage.setItem('email', response.data.email);
-      alert('Connexion réussie !');
-      navigate('/restaurants');
+      
+      // Déterminer le rôle selon l'email (simulation pour la démo)
+      let role = 'CLIENT';
+      if (email === 'admin@marrakechfood.com') {
+        role = 'ADMIN';
+      } else if (email === 'livreur@marrakechfood.com') {
+        role = 'LIVREUR';
+      } else if (email.includes('livreur')) {
+        role = 'LIVREUR';
+      }
+      
+      // Stocker le rôle
+      localStorage.setItem('role', role);
+      
+      // Mettre à jour les states du parent (App.js)
+      if (setIsAuthenticated) setIsAuthenticated(true);
+      if (setUserRole) setUserRole(role);
+      
+      alert(`Connexion réussie en tant que ${role} !`);
+      
+      // Rediriger selon le rôle
+      if (role === 'ADMIN') {
+        navigate('/admin/restaurants');
+      } else if (role === 'LIVREUR') {
+        navigate('/livreur/dashboard');
+      } else {
+        navigate('/restaurants');
+      }
+      
     } catch (err) {
       setError('Email ou mot de passe incorrect');
       console.error('Erreur login:', err);
@@ -30,7 +59,7 @@ function Login() {
 
   return (
     <div style={{ maxWidth: 400, margin: '50px auto', padding: 20, border: '1px solid #ccc', borderRadius: 10 }}>
-      <h2 style={{ textAlign: 'center', color: '#FF6B35' }}>Marrakech Food</h2>
+      <h2 style={{ textAlign: 'center', color: '#FF6B35' }}>🍽️ Marrakech Food</h2>
       <h3>Connexion</h3>
       
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -42,7 +71,8 @@ function Login() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{ width: '100%', padding: 8, margin: '10px 0' }}
+            placeholder="ex: client@test.com"
+            style={{ width: '100%', padding: 8, margin: '10px 0', borderRadius: 4, border: '1px solid #ccc' }}
             required
           />
         </div>
@@ -52,7 +82,8 @@ function Login() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: 8, margin: '10px 0' }}
+            placeholder="1234"
+            style={{ width: '100%', padding: 8, margin: '10px 0', borderRadius: 4, border: '1px solid #ccc' }}
             required
           />
         </div>
@@ -66,12 +97,21 @@ function Login() {
             color: 'white', 
             border: 'none', 
             borderRadius: 5,
-            cursor: loading ? 'not-allowed' : 'pointer'
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontSize: 16
           }}
         >
           {loading ? 'Connexion...' : 'Se connecter'}
         </button>
       </form>
+      
+      {/* Section comptes de test */}
+      <div style={{ marginTop: 20, padding: 10, backgroundColor: '#f0f0f0', borderRadius: 5 }}>
+        <p style={{ fontSize: 12, margin: 0, color: '#666' }}>🔐 Comptes de test :</p>
+        <p style={{ fontSize: 12, margin: 5, color: '#666' }}>👤 Client : client@test.com / 1234</p>
+        <p style={{ fontSize: 12, margin: 5, color: '#666' }}>👑 Admin : admin@marrakechfood.com / 1234</p>
+        <p style={{ fontSize: 12, margin: 5, color: '#666' }}>🚚 Livreur : livreur@marrakechfood.com / 1234</p>
+      </div>
       
       <p style={{ textAlign: 'center', marginTop: 20 }}>
         Pas de compte ?{' '}

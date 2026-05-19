@@ -37,11 +37,23 @@ function RestaurantDetail() {
     if (existing) {
       existing.quantite++;
     } else {
-      panier.push({ ...plat, quantite: 1 });
+      panier.push({ ...plat, quantite: 1, restaurantId: parseInt(id) });
     }
     
     localStorage.setItem('panier', JSON.stringify(panier));
     alert(`${plat.nom} ajouté au panier !`);
+  };
+
+  const handleDeletePlat = async (platId, platNom) => {
+    if (window.confirm(`Supprimer le plat "${platNom}" ?`)) {
+      try {
+        await restaurantAPI.deletePlat(platId);
+        alert('Plat supprimé');
+        fetchData();
+      } catch (err) {
+        alert('Erreur suppression');
+      }
+    }
   };
 
   if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}>Chargement...</div>;
@@ -57,29 +69,52 @@ function RestaurantDetail() {
       <p>📍 {restaurant?.adresse}</p>
       <p>🍳 {restaurant?.typeCuisine}</p>
       
+      <button 
+        onClick={() => navigate(`/admin/plat/add/${id}`)} 
+        style={{ marginBottom: 20, marginLeft: 20, padding: 10, backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: 5, cursor: 'pointer' }}
+      >
+        ➕ Ajouter un plat
+      </button>
+      
       <h2 style={{ marginTop: 30 }}>Notre carte</h2>
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: 15 }}>
         {plats.map((plat) => (
-          <div key={plat.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 15, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h3 style={{ margin: '0 0 5px 0' }}>{plat.nom}</h3>
-              <p style={{ margin: 0, color: '#666' }}>{plat.description}</p>
-              <p style={{ margin: '10px 0 0 0', fontWeight: 'bold', color: '#FF6B35' }}>{plat.prix} DH</p>
+          <div key={plat.id} style={{ border: '1px solid #ddd', borderRadius: 8, padding: 15 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ margin: '0 0 5px 0' }}>{plat.nom}</h3>
+                <p style={{ margin: 0, color: '#666' }}>{plat.description}</p>
+                <p style={{ margin: '10px 0 0 0', fontWeight: 'bold', color: '#FF6B35' }}>{plat.prix} DH</p>
+              </div>
+              <button 
+                onClick={() => ajouterAuPanier(plat)}
+                style={{ 
+                  padding: '10px 20px', 
+                  backgroundColor: '#FF6B35', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: 5,
+                  cursor: 'pointer'
+                }}
+              >
+                Ajouter
+              </button>
             </div>
-            <button 
-              onClick={() => ajouterAuPanier(plat)}
-              style={{ 
-                padding: '10px 20px', 
-                backgroundColor: '#FF6B35', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: 5,
-                cursor: 'pointer'
-              }}
-            >
-              Ajouter
-            </button>
+            <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+              <button 
+                onClick={() => navigate(`/admin/plat/edit/${plat.id}/restaurant/${id}`)} 
+                style={{ padding: '5px 10px', cursor: 'pointer' }}
+              >
+                ✏️ Modifier
+              </button>
+              <button 
+                onClick={() => handleDeletePlat(plat.id, plat.nom)} 
+                style={{ padding: '5px 10px', cursor: 'pointer', backgroundColor: '#dc3545', color: 'white', border: 'none' }}
+              >
+                🗑️ Supprimer
+              </button>
+            </div>
           </div>
         ))}
       </div>

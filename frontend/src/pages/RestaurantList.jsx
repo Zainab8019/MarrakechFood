@@ -24,6 +24,18 @@ function RestaurantList() {
     }
   };
 
+  const handleDelete = async (id, nom) => {
+    if (window.confirm(`Supprimer le restaurant "${nom}" ?`)) {
+      try {
+        await restaurantAPI.delete(id);
+        alert('Restaurant supprimé');
+        fetchRestaurants();
+      } catch (err) {
+        alert('Erreur suppression');
+      }
+    }
+  };
+
   if (loading) return <div style={{ textAlign: 'center', marginTop: 50 }}>Chargement...</div>;
   if (error) return <div style={{ color: 'red', textAlign: 'center', marginTop: 50 }}>{error}</div>;
 
@@ -36,7 +48,6 @@ function RestaurantList() {
         {restaurants.map((restaurant) => (
           <div 
             key={restaurant.id} 
-            onClick={() => navigate(`/restaurant/${restaurant.id}`)}
             style={{ 
               border: '1px solid #ddd', 
               borderRadius: 10, 
@@ -48,10 +59,26 @@ function RestaurantList() {
             onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)'}
             onMouseLeave={(e) => e.currentTarget.style.boxShadow = 'none'}
           >
-            <h3 style={{ margin: '0 0 10px 0', color: '#FF6B35' }}>{restaurant.nom}</h3>
-            <p style={{ margin: '5px 0', color: '#666' }}>📍 {restaurant.adresse}</p>
-            <p style={{ margin: '5px 0', color: '#666' }}>🍳 {restaurant.typeCuisine || 'Cuisine variée'}</p>
-            <p style={{ margin: '5px 0', color: '#888' }}>⭐ {restaurant.note || '4.5'} / 5</p>
+            <div onClick={() => navigate(`/restaurant/${restaurant.id}`)}>
+              <h3 style={{ margin: '0 0 10px 0', color: '#FF6B35' }}>{restaurant.nom}</h3>
+              <p style={{ margin: '5px 0', color: '#666' }}>📍 {restaurant.adresse}</p>
+              <p style={{ margin: '5px 0', color: '#666' }}>🍳 {restaurant.typeCuisine || 'Cuisine variée'}</p>
+              <p style={{ margin: '5px 0', color: '#888' }}>⭐ {restaurant.note || '4.5'} / 5</p>
+            </div>
+            <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+              <button 
+                onClick={() => navigate(`/admin/restaurant/edit/${restaurant.id}`)} 
+                style={{ padding: '5px 10px', cursor: 'pointer' }}
+              >
+                ✏️ Modifier
+              </button>
+              <button 
+                onClick={() => handleDelete(restaurant.id, restaurant.nom)} 
+                style={{ padding: '5px 10px', cursor: 'pointer', backgroundColor: '#dc3545', color: 'white', border: 'none' }}
+              >
+                🗑️ Supprimer
+              </button>
+            </div>
           </div>
         ))}
       </div>

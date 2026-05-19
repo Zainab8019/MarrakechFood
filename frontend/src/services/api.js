@@ -18,7 +18,16 @@ export const clientAPI = {
 export const restaurantAPI = {
   getAll: () => axios.get(`${API_CONFIG.restaurant}/api/restaurants`),
   getById: (id) => axios.get(`${API_CONFIG.restaurant}/api/restaurants/${id}`),
-  getPlats: (restaurantId) => axios.get(`${API_CONFIG.restaurant}/api/restaurants/${restaurantId}/plats`)
+  getPlats: (restaurantId) => axios.get(`${API_CONFIG.restaurant}/api/restaurants/${restaurantId}/plats`),
+  // Ajout CRUD restaurants
+  create: (data) => axios.post(`${API_CONFIG.restaurant}/api/restaurants`, data),
+  update: (id, data) => axios.put(`${API_CONFIG.restaurant}/api/restaurants/${id}`, data),
+  delete: (id) => axios.delete(`${API_CONFIG.restaurant}/api/restaurants/${id}`),
+  // Ajout CRUD plats
+  getPlatById: (id) => axios.get(`${API_CONFIG.restaurant}/api/plats/${id}`),
+  createPlat: (restaurantId, data) => axios.post(`${API_CONFIG.restaurant}/api/restaurants/${restaurantId}/plats`, data),
+  updatePlat: (id, data) => axios.put(`${API_CONFIG.restaurant}/api/plats/${id}`, data),
+  deletePlat: (id) => axios.delete(`${API_CONFIG.restaurant}/api/restaurants/plats/${id}`)
 };
 
 // Commande Service
@@ -26,7 +35,9 @@ export const commandeAPI = {
   create: (data) => axios.post(`${API_CONFIG.commande}/api/commandes`, data),
   getByClient: (clientId) => axios.get(`${API_CONFIG.commande}/api/commandes/client/${clientId}`),
   getById: (id) => axios.get(`${API_CONFIG.commande}/api/commandes/${id}`),
-  valider: (id) => axios.put(`${API_CONFIG.commande}/api/commandes/${id}/valider`)
+  valider: (id) => axios.put(`${API_CONFIG.commande}/api/commandes/${id}/valider`),
+  // Ajout pour récupérer commandes par statut 
+  getByStatut: (statut) => axios.get(`${API_CONFIG.commande}/api/commandes?statut=${statut}`)
 };
 
 // Livreur Service

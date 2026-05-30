@@ -71,27 +71,27 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      
+
       - name: Build Client Service
         run: |
           cd client-service
           mvn clean package -DskipTests -q
-      
+
       - name: Build Restaurant Service
         run: |
           cd restaurant-service
           mvn clean package -DskipTests -q
-      
+
       - name: Build Commande Service
         run: |
           cd commande-service
           mvn clean package -DskipTests -q
-      
+
       - name: Build Livreur Service
         run: |
           cd livreur-service
           mvn clean package -DskipTests -q
-      
+
       # ============= STAGE 3: UPLOAD ARTIFACTS =============
       - name: Upload Client Service JAR
         uses: actions/upload-artifact@v4
@@ -99,21 +99,21 @@ jobs:
           name: client-service-jar
           path: client-service/target/*.jar
           retention-days: 30
-      
+
       - name: Upload Restaurant Service JAR
         uses: actions/upload-artifact@v4
         with:
           name: restaurant-service-jar
           path: restaurant-service/target/*.jar
           retention-days: 30
-      
+
       - name: Upload Commande Service JAR
         uses: actions/upload-artifact@v4
         with:
           name: commande-service-jar
           path: commande-service/target/*.jar
           retention-days: 30
-      
+
       - name: Upload Livreur Service JAR
         uses: actions/upload-artifact@v4
         with:
@@ -128,20 +128,24 @@ jobs:
     if: success()
     steps:
       - uses: actions/checkout@v4
+
+      # FIX 1: Node 20 requis par react-router-dom 7.x (>=20.0.0)
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-      
+          node-version: '20'
+
       - name: Install Frontend Dependencies
         run: |
           cd frontend
-          npm ci
-      
+          # FIX 2: npm install au lieu de npm ci
+          # (package-lock.json désynchronisé après ajout de yaml@2.9.0)
+          npm install
+
       - name: Build Frontend
         run: |
           cd frontend
           npm run build
-      
+
       - name: Upload Frontend Build
         uses: actions/upload-artifact@v4
         with:
@@ -156,18 +160,18 @@ jobs:
     if: success() && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-artifacts
-      
+
       - name: Create Release Archive
         run: |
           mkdir -p MarrakechFood-Release
           cp -r release-artifacts/* MarrakechFood-Release/
           zip -r MarrakechFood-${{ github.run_number }}.zip MarrakechFood-Release/
-      
+
       - name: Create GitHub Release
         uses: actions/create-release@v1
         id: create_release
@@ -178,16 +182,16 @@ jobs:
           release_name: Release Build ${{ github.run_number }}
           body: |
             # 🎉 MarrakechFood Deployment Package
-            
+
             ## 📦 Contents
             - ✅ Client Service JAR
             - ✅ Restaurant Service JAR
             - ✅ Commande Service JAR
             - ✅ Livreur Service JAR
             - ✅ Frontend Build
-            
+
             ## 🚀 How to Deploy
-            
+
             ### Backend Services
             ```bash
             java -jar client-service.jar
@@ -195,13 +199,13 @@ jobs:
             java -jar commande-service.jar
             java -jar livreur-service.jar
             ```
-            
+
             ### Frontend
             ```bash
             npm install -g serve
             serve -s frontend-build -l 3000
             ```
-            
+
             ## 🔗 Environment Variables
             Set these before running:
             - MYSQLHOST=your-db-host
@@ -210,12 +214,12 @@ jobs:
             - MYSQLUSER=your-user
             - MYSQLPASSWORD=your-password
             - PORT=8080
-            
+
             ---
             Build: ${{ github.run_number }}
             Commit: ${{ github.sha }}
             Branch: ${{ github.ref }}
-      
+
       - name: Upload Release Assets
         uses: actions/upload-release-asset@v1
         env:
@@ -254,7 +258,7 @@ jobs:
           echo ""
           echo "🔗 Access:"
           echo "   • GitHub Releases: https://github.com/Zainab8019/MarrakechFood/releases"
-          echo "   • GitHub Actions: https://github.com/Zainab8019/MarrakechFood/actions"
+          echo "   • GitHub Actions:  https://github.com/Zainab8019/MarrakechFood/actions"
           echo ""
           echo "🚀 Next Steps:"
           echo "   1. Download Release Package"

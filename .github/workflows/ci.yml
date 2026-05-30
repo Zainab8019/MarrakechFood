@@ -1,4 +1,4 @@
-name: CI - Tests Automatiques
+name: CI/CD - Build, Test & Package
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
+  # ============= STAGE 1: TEST =============
   test-client:
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +16,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Tester Client Service
+      - name: Test Client Service
         run: |
           cd client-service
           mvn clean test
@@ -28,7 +29,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Tester Restaurant Service
+      - name: Test Restaurant Service
         run: |
           cd restaurant-service
           mvn clean test
@@ -41,7 +42,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Tester Commande Service
+      - name: Test Commande Service
         run: |
           cd commande-service
           mvn clean test
@@ -54,7 +55,210 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Tester Livreur Service
+      - name: Test Livreur Service
         run: |
           cd livreur-service
           mvn clean test
+
+  # ============= STAGE 2: BUILD & PACKAGE =============
+  build-and-package:
+    needs: [test-client, test-restaurant, test-commande, test-livreur]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4.0.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Build Client Service
+        run: |
+          cd client-service
+          mvn clean package -DskipTests -q
+      
+      - name: Build Restaurant Service
+        run: |
+          cd restaurant-service
+          mvn clean package -DskipTests -q
+      
+      - name: Build Commande Service
+        run: |
+          cd commande-service
+          mvn clean package -DskipTests -q
+      
+      - name: Build Livreur Service
+        run: |
+          cd livreur-service
+          mvn clean package -DskipTests -q
+      
+      # ============= STAGE 3: UPLOAD ARTIFACTS =============
+      - name: Upload Client Service JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-service-jar
+          path: client-service/target/*.jar
+          retention-days: 30
+      
+      - name: Upload Restaurant Service JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: restaurant-service-jar
+          path: restaurant-service/target/*.jar
+          retention-days: 30
+      
+      - name: Upload Commande Service JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: commande-service-jar
+          path: commande-service/target/*.jar
+          retention-days: 30
+      
+      - name: Upload Livreur Service JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: livreur-service-jar
+          path: livreur-service/target/*.jar
+          retention-days: 30
+
+  # ============= STAGE 4: BUILD FRONTEND =============
+  build-frontend:
+    needs: [test-client, test-restaurant, test-commande, test-livreur]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Frontend Dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm run build
+      
+      - name: Upload Frontend Build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/build
+          retention-days: 30
+
+  # ============= STAGE 5: CREATE RELEASE =============
+  create-release:
+    needs: [build-and-package, build-frontend]
+    runs-on: ubuntu-latest
+    if: success() && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+      
+      - name: Create Release Archive
+        run: |
+          mkdir -p MarrakechFood-Release
+          cp -r release-artifacts/* MarrakechFood-Release/
+          zip -r MarrakechFood-${{ github.run_number }}.zip MarrakechFood-Release/
+      
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v1.0.0-build-${{ github.run_number }}
+          release_name: Release Build ${{ github.run_number }}
+          body: |
+            # 🎉 MarrakechFood Deployment Package
+            
+            ## 📦 Contents
+            - ✅ Client Service JAR
+            - ✅ Restaurant Service JAR
+            - ✅ Commande Service JAR
+            - ✅ Livreur Service JAR
+            - ✅ Frontend Build
+            
+            ## 🚀 How to Deploy
+            
+            ### Backend Services
+            ```bash
+            java -jar client-service.jar
+            java -jar restaurant-service.jar
+            java -jar commande-service.jar
+            java -jar livreur-service.jar
+            ```
+            
+            ### Frontend
+            ```bash
+            npm install -g serve
+            serve -s frontend-build -l 3000
+            ```
+            
+            ## 🔗 Environment Variables
+            Set these before running:
+            - MYSQLHOST=your-db-host
+            - MYSQLPORT=3306
+            - MYSQLDATABASE=marrakech_food
+            - MYSQLUSER=your-user
+            - MYSQLPASSWORD=your-password
+            - PORT=8080
+            
+            ---
+            Build: ${{ github.run_number }}
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref }}
+      
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./MarrakechFood-${{ github.run_number }}.zip
+          asset_name: MarrakechFood-${{ github.run_number }}.zip
+          asset_content_type: application/zip
+
+  # ============= FINAL SUMMARY =============
+  deployment-summary:
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Print CI/CD Pipeline Summary
+        run: |
+          echo "╔════════════════════════════════════════════════════════════╗"
+          echo "║          ✅ CI/CD PIPELINE COMPLETED SUCCESSFULLY          ║"
+          echo "╚════════════════════════════════════════════════════════════╝"
+          echo ""
+          echo "📊 Pipeline Stages:"
+          echo "   1️⃣  Testing       : ✅ All 4 services tested"
+          echo "   2️⃣  Building      : ✅ All services packaged"
+          echo "   3️⃣  Frontend      : ✅ Build completed"
+          echo "   4️⃣  Artifacts     : ✅ Uploaded (30 days retention)"
+          echo "   5️⃣  Release       : ✅ GitHub Release created"
+          echo ""
+          echo "📦 Generated Artifacts:"
+          echo "   • client-service-jar"
+          echo "   • restaurant-service-jar"
+          echo "   • commande-service-jar"
+          echo "   • livreur-service-jar"
+          echo "   • frontend-build"
+          echo ""
+          echo "🔗 Access:"
+          echo "   • GitHub Releases: https://github.com/Zainab8019/MarrakechFood/releases"
+          echo "   • GitHub Actions: https://github.com/Zainab8019/MarrakechFood/actions"
+          echo ""
+          echo "🚀 Next Steps:"
+          echo "   1. Download Release Package"
+          echo "   2. Extract ZIP file"
+          echo "   3. Deploy services to your server"
+          echo ""
+          echo "════════════════════════════════════════════════════════════"

@@ -213,7 +213,7 @@ https://marrakechfood-production-22c2.up.railway.app
 
 | Nom | Profil GitHub |
 |---|---|
-| Zainab ZAHID | [@zainab]([https://github.com/jihanenasri) |
-| Jihane NASRI | [@jihane](https://github.com/Zainab8019) |
+| Zainab ZAHID | [@zainab](https://github.com/Zainab8019) |
+| Jihane NASRI | [@jihane]([https://github.com/jihanenasri) |
 
 Encadré par **Fahd KALLOUBI** — Université Cadi Ayyad, Marrakech — 2025/2026
